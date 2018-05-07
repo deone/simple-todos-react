@@ -3,6 +3,7 @@
 import { Meteor } from 'meteor/meteor';
 import { Random } from 'meteor/random';
 import { assert } from 'chai';
+import { Accounts } from 'meteor/accounts-base';
 
 import { Tasks } from './tasks.js';
 
@@ -17,8 +18,23 @@ if (Meteor.isServer) {
 
   describe('Tasks', function() {
     describe('methods', function() {
-      const userId = Random.id();
-      let taskId;
+      // const userId = Random.id();
+      // let taskId;
+
+      const username = 'deone';
+      let taskId, userId;
+
+      before(function() {
+        // Create user if not already created.
+        userId = Meteor.users.findOne({username: username})._id;
+        if (!userId) {
+          userId = Accounts.createUser({
+            'username': username,
+            'email': 'a@a.com',
+            'password': '12345578',
+          }); 
+        }
+      });
 
       beforeEach(function() {
         Tasks.remove({});
@@ -60,12 +76,13 @@ if (Meteor.isServer) {
         assert.equal(Tasks.find({checked: true}).count(), 1);
       });
 
-      /* it('can insert task', function() {
+      it('can insert task', function() {
         let text = 'Hello!';
         const insert = Meteor.server.method_handlers['tasks.insert'];
         const invocation = { userId };
         insert.apply(invocation, [text]);
-      }); */
+        assert.equal(Tasks.find().count(), 2);
+      });
     });
   });
 }
