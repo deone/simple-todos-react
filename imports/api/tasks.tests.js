@@ -7,12 +7,20 @@ import { assert } from 'chai';
 import { Tasks } from './tasks.js';
 
 if (Meteor.isServer) {
-  describe('Tasks', () => {
-    describe('methods', () => {
+  /* describe('Array', function() {
+    describe('#indexOf()', function() {
+      it('should return -1 when the value is not present', function() {
+        assert.equal([1,2,3].indexOf(4), -1);
+      });
+    });
+  }); */
+
+  describe('Tasks', function() {
+    describe('methods', function() {
       const userId = Random.id();
       let taskId;
 
-      beforeEach(() => {
+      beforeEach(function() {
         Tasks.remove({});
         taskId = Tasks.insert({
           text: 'test task',
@@ -22,7 +30,7 @@ if (Meteor.isServer) {
         });
       });
 
-      it('can delete owned task', () => {
+      it('can delete own task', function() {
         // Find the internal implementation of the task method so we can
         // test it in isolation
         const deleteTask = Meteor.server.method_handlers['tasks.remove'];
@@ -36,6 +44,28 @@ if (Meteor.isServer) {
         // Verify that the method does what we expected
         assert.equal(Tasks.find().count(), 0);
       });
+
+      /* Classwork */
+      it('can set own task private', function() {
+        const setTaskPrivate = Meteor.server.method_handlers['tasks.setPrivate'];
+        const invocation = { userId };
+        setTaskPrivate.apply(invocation, [taskId, true]);
+        assert.equal(Tasks.find({private: true}).count(), 1);
+      });
+
+      it('can set own task checked', function() {
+        const setChecked = Meteor.server.method_handlers['tasks.setChecked'];
+        const invocation = { userId };
+        setChecked.apply(invocation, [taskId, true]);
+        assert.equal(Tasks.find({checked: true}).count(), 1);
+      });
+
+      /* it('can insert task', function() {
+        let text = 'Hello!';
+        const insert = Meteor.server.method_handlers['tasks.insert'];
+        const invocation = { userId };
+        insert.apply(invocation, [text]);
+      }); */
     });
   });
 }
