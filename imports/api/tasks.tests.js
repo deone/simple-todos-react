@@ -1,7 +1,6 @@
 /* eslint-env mocha */
 
 import { Meteor } from 'meteor/meteor';
-import { Random } from 'meteor/random';
 import { assert } from 'chai';
 import { Accounts } from 'meteor/accounts-base';
 
@@ -18,21 +17,20 @@ if (Meteor.isServer) {
 
   describe('Tasks', function() {
     describe('methods', function() {
-      // const userId = Random.id();
-      // let taskId;
-
       const username = 'deone';
       let taskId, userId;
 
       before(function() {
         // Create user if not already created.
-        userId = Meteor.users.findOne({username: username})._id;
-        if (!userId) {
+        let user = Meteor.users.findOne({username: username});
+        if (!user) {
           userId = Accounts.createUser({
             'username': username,
             'email': 'a@a.com',
             'password': '12345578',
           }); 
+        } else {
+          userId = user._id;
         }
       });
 
