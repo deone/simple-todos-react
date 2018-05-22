@@ -37,6 +37,32 @@ if (Meteor.isServer) {
         });
       });
 
+      // Insert
+      it('can insert task', function() {
+        let text = 'Hello!';
+        const insert = Meteor.server.method_handlers['tasks.insert'];
+        const invocation = { userId };
+        insert.apply(invocation, [text]);
+        assert.equal(Tasks.find().count(), 2);
+      });
+
+      it('cannot insert task if not logged in', function() {
+        let text = 'Hi!';
+
+        const insert = Meteor.server.method_handlers['tasks.insert'];
+
+        // No userId passed into fake method invocation
+        const invocation = {};
+
+        assert.throws(function() {
+          insert.apply(invocation, [text]);
+        }, Meteor.Error, /not-authorized/);
+
+        assert.equal(Tasks.find().count(), 1);
+      });
+
+      // Remove
+      // Do this, give rest as classwork
       it('can delete own task', function() {
         // Find the internal implementation of the task method so we can
         // test it in isolation
@@ -52,7 +78,6 @@ if (Meteor.isServer) {
         assert.equal(Tasks.find().count(), 0);
       });
 
-      /* Classwork */
       it("cannot delete someone else's task", function() {
         // Set task to private
         Tasks.update(taskId, { $set: { private: true } });
@@ -73,13 +98,7 @@ if (Meteor.isServer) {
         assert.equal(Tasks.find().count(), 1);
       });
 
-      it('can set own task private', function() {
-        const setTaskPrivate = Meteor.server.method_handlers['tasks.setPrivate'];
-        const invocation = { userId };
-        setTaskPrivate.apply(invocation, [taskId, true]);
-        assert.equal(Tasks.find({private: true}).count(), 1);
-      });
-
+      // Set task checked
       it('can set own task checked', function() {
         const setChecked = Meteor.server.method_handlers['tasks.setChecked'];
         const invocation = { userId };
@@ -87,12 +106,36 @@ if (Meteor.isServer) {
         assert.equal(Tasks.find({checked: true}).count(), 1);
       });
 
-      it('can insert task', function() {
-        let text = 'Hello!';
-        const insert = Meteor.server.method_handlers['tasks.insert'];
+      it("cannot set someone else's task checked", function() {
+        // Set task to private
+        Tasks.update(taskId, { $set: { private: true } });
+
+        // Generate a random ID, representing a different user
+        const userId = Random.id();
+
+        const setChecked = Meteor.server.method_handlers['tasks.setChecked'];
         const invocation = { userId };
-        insert.apply(invocation, [text]);
-        assert.equal(Tasks.find().count(), 2);
+
+        // Verify that error is thrown
+        // - https://stackoverflow.com/questions/43336212/how-to-expect-a-meteor-error-with-chai
+        assert.throws(function() {
+          setChecked.apply(invocation, [taskId, true]);
+        }, Meteor.Error, /not-authorized/);
+
+        // Verify that task is not set checked
+        assert.equal(Tasks.find({checked: true}).count(), 0);
+      });
+
+      // Set task private
+      it('can set own task private', function() {
+        const setTaskPrivate = Meteor.server.method_handlers['tasks.setPrivate'];
+        const invocation = { userId };
+        setTaskPrivate.apply(invocation, [taskId, true]);
+        assert.equal(Tasks.find({private: true}).count(), 1);
+      });
+
+      it("cannot set someone else's task private", function() {
+        
       });
     });
   });
