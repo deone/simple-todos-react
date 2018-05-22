@@ -1,20 +1,13 @@
 /* eslint-env mocha */
 
 import { Meteor } from 'meteor/meteor';
+import { Random } from 'meteor/random';
 import { assert } from 'chai';
 import { Accounts } from 'meteor/accounts-base';
 
 import { Tasks } from './tasks.js';
 
 if (Meteor.isServer) {
-  /* describe('Array', function() {
-    describe('#indexOf()', function() {
-      it('should return -1 when the value is not present', function() {
-        assert.equal([1,2,3].indexOf(4), -1);
-      });
-    });
-  }); */
-
   describe('Tasks', function() {
     describe('methods', function() {
       const username = 'deone';
@@ -60,6 +53,22 @@ if (Meteor.isServer) {
       });
 
       /* Classwork */
+      it("cannot delete someone else's task", function() {
+        // Set task to private
+        Tasks.update(taskId, { $set: { private: true } });
+
+        // Generate a random ID, representing a different user
+        const userId = Random.id();
+
+        const deleteTask = Meteor.server.method_handlers['tasks.remove'];
+        const invocation = { userId };
+
+        // https://stackoverflow.com/questions/43336212/how-to-expect-a-meteor-error-with-chai
+        assert.throws(function() {
+          deleteTask.apply(invocation, [taskId]);
+        }, Meteor.Error, /not-authorized/);
+      });
+
       it('can set own task private', function() {
         const setTaskPrivate = Meteor.server.method_handlers['tasks.setPrivate'];
         const invocation = { userId };
