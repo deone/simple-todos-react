@@ -63,10 +63,14 @@ if (Meteor.isServer) {
         const deleteTask = Meteor.server.method_handlers['tasks.remove'];
         const invocation = { userId };
 
-        // https://stackoverflow.com/questions/43336212/how-to-expect-a-meteor-error-with-chai
+        // Verify that error is thrown
+        // - https://stackoverflow.com/questions/43336212/how-to-expect-a-meteor-error-with-chai
         assert.throws(function() {
           deleteTask.apply(invocation, [taskId]);
         }, Meteor.Error, /not-authorized/);
+
+        // Verify that task is not deleted
+        assert.equal(Tasks.find().count(), 1);
       });
 
       it('can set own task private', function() {
