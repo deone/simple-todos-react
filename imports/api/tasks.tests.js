@@ -135,7 +135,20 @@ if (Meteor.isServer) {
       });
 
       it("cannot set someone else's task private", function() {
-        
+        // Generate a random ID, representing a different user
+        const userId = Random.id();
+
+        const setPrivate = Meteor.server.method_handlers['tasks.setPrivate'];
+        const invocation = { userId };
+
+        // Verify that error is thrown
+        // - https://stackoverflow.com/questions/43336212/how-to-expect-a-meteor-error-with-chai
+        assert.throws(function() {
+          setPrivate.apply(invocation, [taskId, true]);
+        }, Meteor.Error, /not-authorized/);
+
+        // Verify that task is not set private
+        assert.equal(Tasks.find({private: true}).count(), 0);
       });
     });
   });
