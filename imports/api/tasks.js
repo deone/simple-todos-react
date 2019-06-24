@@ -26,12 +26,14 @@ Meteor.methods({
       throw new Meteor.Error('not-authorized');
     }
 
-    Tasks.insert({
+    let taskId = Tasks.insert({
       text,
       createdAt: new Date(),
       owner: this.userId,
       username: Meteor.users.findOne(this.userId).username,
     });
+    let task = Tasks.findOne(taskId);
+    console.log(task.username);
   },
   'tasks.remove'(taskId) {
     check(taskId, String);
