@@ -46,7 +46,7 @@ if (Meteor.isServer) {
 
         insert.apply(invocation, [text])
 
-        assert.equal(Tasks.find().count(), 2)
+        assert.strictEqual(Tasks.find().count(), 2)
       })
 
       it('cannot insert task if not logged in', () => {
@@ -60,7 +60,7 @@ if (Meteor.isServer) {
         assert.throws(() => insert.apply(invocation, [text]),
           Meteor.Error, '[You are not allowed to insert without logging in]')
 
-        assert.equal(Tasks.find().count(), 1)
+        assert.strictEqual(Tasks.find().count(), 1)
       })
 
       // Remove
@@ -77,7 +77,7 @@ if (Meteor.isServer) {
         deleteTask.apply(invocation, [taskId])
 
         // Verify that the method does what we expected
-        assert.equal(Tasks.find().count(), 0)
+        assert.strictEqual(Tasks.find().count(), 0)
       })
 
       it("cannot delete someone else's task", () => {
@@ -95,7 +95,7 @@ if (Meteor.isServer) {
           Meteor.Error, "[You are not allowed to deleted someone else's task]")
 
         // Verify that task is not deleted
-        assert.equal(Tasks.find().count(), 1)
+        assert.strictEqual(Tasks.find().count(), 1)
       })
 
       // Set task checked
@@ -105,7 +105,7 @@ if (Meteor.isServer) {
         const invocation = { userId }
         setChecked.apply(invocation, [taskId, true])
 
-        assert.equal(Tasks.find({checked: true}).count(), 1)
+        assert.strictEqual(Tasks.find({checked: true}).count(), 1)
       })
 
       it("cannot set someone else's task checked", () => {
@@ -123,7 +123,7 @@ if (Meteor.isServer) {
           Meteor.Error, "[You are not allowed to check off someone else's task]")
 
         // Verify that task is not set checked
-        assert.equal(Tasks.find({checked: true}).count(), 0)
+        assert.strictEqual(Tasks.find({checked: true}).count(), 0)
       })
 
       // Set task private
@@ -133,7 +133,7 @@ if (Meteor.isServer) {
         const invocation = { userId }
         setTaskPrivate.apply(invocation, [taskId, true])
 
-        assert.equal(Tasks.find({private: true}).count(), 1)
+        assert.strictEqual(Tasks.find({private: true}).count(), 1)
       })
 
       it("cannot set someone else's task private", () => {
@@ -148,7 +148,7 @@ if (Meteor.isServer) {
           Meteor.Error, "[You are not allowed to set someone else's task as private]")
 
         // Verify that task is not set private
-        assert.equal(Tasks.find({private: true}).count(), 0)
+        assert.strictEqual(Tasks.find({private: true}).count(), 0)
       })
     })
   })
