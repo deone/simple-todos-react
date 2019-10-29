@@ -28,13 +28,16 @@ if (Meteor.isServer) {
       })
 
       beforeEach(() => {
-        Tasks.remove({})
         taskId = Tasks.insert({
           text: 'test task',
           createdAt: new Date(),
           owner: userId,
           username: 'tmeasday',
         })
+      })
+
+      afterEach(() => {
+        Tasks.remove({})
       })
 
       // Insert
@@ -150,6 +153,22 @@ if (Meteor.isServer) {
         // Verify that task is not set private
         assert.strictEqual(Tasks.find({private: true}).count(), 0)
       })
+
+      it('can view own task and non-private tasks', () => {
+        const userId = Random.id()
+        Tasks.insert({
+          text: 'test task 2',
+          createdAt: new Date(),
+          owner: userId,
+          username: 'eugene'
+        })
+
+        const invocation = { userId }
+        const tasksPublication = Meteor.server.publish_handlers['tasks']
+
+        assert.strictEqual(tasksPublication.apply(invocation).count(), 2)
+      })
+
     })
   })
 }
