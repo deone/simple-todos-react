@@ -1,76 +1,77 @@
-import { Meteor } from 'meteor/meteor';
-import { Mongo } from 'meteor/mongo';
-import { check } from 'meteor/check';
+import { Meteor } from 'meteor/meteor'
+import { Mongo } from 'meteor/mongo'
+import { check } from 'meteor/check'
 
-export const Tasks = new Mongo.Collection('tasks');
+export const Tasks = new Mongo.Collection('tasks')
 
 if (Meteor.isServer) {
   // This code only runs on the server
   // Only publish tasks that are public or belong to the current user
-  Meteor.publish('tasks', function tasksPublication() {
+  Meteor.publish('tasks', () => {
     return Tasks.find({
       $or: [
         { private: { $ne: true } },
         { owner: this.userId },
       ],
-    });
-  });
+    })
+  })
 }
 
 Meteor.methods({
   'tasks.insert'(text) {
-    check(text, String);
+    check(text, String)
 
     // Make sure the user is logged in before inserting a task
-    if (! this.userId) {
-      throw new Meteor.Error('You are not allowed to insert without logging in');
-    }
+    if (!this.userId)
+      throw new Meteor.Error(
+        'You are not allowed to insert without logging in')
 
-    let taskId = Tasks.insert({
+    Tasks.insert({
       text,
       createdAt: new Date(),
       owner: this.userId,
       username: Meteor.users.findOne(this.userId).username,
-    });
-    let task = Tasks.findOne(taskId);
+    })
   },
 
   'tasks.remove'(taskId) {
-    check(taskId, String);
+    check(taskId, String)
 
-    const task = Tasks.findOne(taskId);
-    if (task.private && task.owner !== this.userId) {
-      // If the task is private, make sure only the owner can delete it
-      throw new Meteor.Error("You are not allowed to deleted someone else's task");
-    }
+    const task = Tasks.findOne(taskId)
+    if (task.private && task.owner !== this.userId)
+      // If the task is private, make sure only
+      // the owner can delete it
+      throw new Meteor.Error(
+        "You are not allowed to deleted someone else's task")
 
-    Tasks.remove(taskId);
+    Tasks.remove(taskId)
   },
 
   'tasks.setChecked'(taskId, setChecked) {
-    check(taskId, String);
-    check(setChecked, Boolean);
+    check(taskId, String)
+    check(setChecked, Boolean)
 
     const task = Tasks.findOne(taskId);
-    if (task.private && task.owner !== this.userId) {
-      // If the task is private, make sure only the owner can check it off
-      throw new Meteor.Error("You are not allowed to check off someone else's task");
-    }
+    if (task.private && task.owner !== this.userId)
+      // If the task is private, make sure only
+      // the owner can check it off
+      throw new Meteor.Error(
+        "You are not allowed to check off someone else's task")
 
-    Tasks.update(taskId, { $set: { checked: setChecked } });
+    Tasks.update(taskId, { $set: { checked: setChecked } })
   },
 
   'tasks.setPrivate'(taskId, setToPrivate) {
-    check(taskId, String);
-    check(setToPrivate, Boolean);
+    check(taskId, String)
+    check(setToPrivate, Boolean)
 
-    const task = Tasks.findOne(taskId);
+    const task = Tasks.findOne(taskId)
 
     // Make sure only the task owner can make a task private
-    if (task.owner !== this.userId) {
-      throw new Meteor.Error("You are not allowed to set someone else's task as private")
-    }
+    if (task.owner !== this.userId)
+      throw new Meteor.Error(
+        "You are not allowed to set someone else's task as private")
 
-    Tasks.update(taskId, { $set: { private: setToPrivate } });
+    Tasks.update(taskId, { $set: { private: setToPrivate } })
   },
-});
+})

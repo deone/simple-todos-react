@@ -15,7 +15,7 @@ if (Meteor.isServer) {
 
       before(() => {
         // Create user if not already created.
-        let user = Meteor.users.findOne({username: username});
+        let user = Meteor.users.findOne({username: username})
         if (!user) {
           userId = Accounts.createUser({
             'username': username,
